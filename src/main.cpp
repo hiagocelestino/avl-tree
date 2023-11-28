@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "avl.hpp"
 
 using namespace std;
@@ -7,8 +8,13 @@ int main() {
     string palavra;
     int pagina;
 
-    while (!feof(stdin)){
+    int lim = 100;
+    int contador = 0;
+    while (contador < lim){
         cin >> palavra >> pagina;
+        avl.insere(palavra, pagina);
+        contador++;
     }
+    avl.imprimiArvore();
     return 0;
 }

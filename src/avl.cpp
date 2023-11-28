@@ -5,6 +5,17 @@ AVL::AVL() {
 }
 
 AVL::~AVL() {
+    limpaRecursivo(raiz);
+}
+
+void AVL::limpaRecursivo(Node* no) {
+    if (no == NULL) {
+        return;
+    } else {
+        limpaRecursivo(no->esq);
+        limpaRecursivo(no->dir);
+        delete no;
+    }
 
 }
 
@@ -28,83 +39,146 @@ int AVL::fatorBalanciamento(Node *no) {
     return balance;
 }
 
-string AVL::pesquisaRecursivo(Node *no, string chave) {
-    
-    if ( no == NULL ) {
-        return "";
-    }
-    if ( chave < no->chave) {
-        return pesquisaRecursivo(no->esq, chave);
-    } else if ( chave > no->chave) {
-        return pesquisaRecursivo(no->dir, chave);
-    } else {
-        return no->valor;
-    }
+void AVL::imprimiArvore(){
+    imprimeRecursivo(raiz);
 }
 
-void AVL::insere(string chave) {
-    raiz = insereRecursivo(raiz, chave);
-}
-
-Node* AVL::insereRecursivo(Node *no, string chave) {
+void AVL::imprimeRecursivo(Node *no) {
     if (no == NULL) {
-        return novoNo(chave);
-    }
-
-    if ( chave < no->chave) {
-        return insereRecursivo(no->esq, chave);
-    } else if ( chave > no->chave) {
-        return insereRecursivo(no->dir, chave);
+        return;
     } else {
-        return no;
+        imprimeRecursivo(no->esq);
+        cout << no->chave << ":";
+        for (int i = 0; i < no->qtdValores; i++) {
+            cout << " ";
+            cout << no->valor[i];
+        }
+        cout << endl;
+        imprimeRecursivo(no->dir);
     }
-
-    no->altura = 1 + max(altura(no->esq), altura(no->dir));
-    int balanceamente = fatorBalanciamento(no);
-
-    if (balanceamente > 1 && chave < no->esq->chave) {
-        return rotacaoDireita(no);
-    }
-
-    if (balanceamente < -1 && chave > no->dir->chave) {
-        return rotacaoEsquerda(no);
-    }
-
-    if (balanceamente > 1 && chave > no->esq->chave) {
-        no->esq = rotacaoEsquerda(no->esq);
-        return rotacaoDireita(no);
-    }
-
-    if (balanceamente < -1 && chave < no->dir->chave) {
-        no->dir = rotacaoDireita(no->dir);
-        return rotacaoEsquerda(no);
-    }
-
-    return no;
 }
 
-Node* AVL::rotacaoEsquerda(Node *x) {
+void AVL::swap(int* valores, int pos1, int pos2){
+    int aux = valores[pos1];
+    valores[pos1] = valores[pos2];
+    valores[pos2] = aux;
+}
+
+void AVL::sort(int* valores, int inicio, int fim) {
+    if (inicio >= fim) return;
+
+    int pivot = particao(valores, inicio, fim);
+
+    sort(valores, inicio, pivot - 1);
+    sort(valores, pivot + 1, fim);
+}
+
+int AVL::particao(int *valores, int inicio, int fim) {
+    int i = inicio;
+
+    for ( int j = inicio; j < fim; j++) {
+        if (valores[j] < valores[fim]) {
+            swap(valores, i++, j);
+        }
+    }
+    swap(valores, i, fim);
+
+    return i;
+};
+
+int AVL::contem(int* valores, int tamanho, int valor) {
+    int contem = 0;
+    for ( int i = 0; i < tamanho; i++ ) {
+        if (valores[i] == valor) {
+            contem = 1;
+            break;
+        }
+    }
+    return contem;
+}
+
+void AVL::insere(string chave, int valor) {
+    insereRecursivo(&raiz, chave, valor);
+}
+
+void AVL::insereRecursivo(Node **no, string chave, int valor) {
+    if (*no == NULL) {
+        *no = novoNo(chave, valor);
+        return;
+    }
+
+    Node *atual = *no;
+
+    if (chave < atual->chave) {
+        insereRecursivo(&(atual->esq), chave, valor);
+    } else if (chave > atual->chave) {
+        insereRecursivo(&(atual->dir), chave, valor);
+    } else {
+        if (!contem(atual->valor, atual->qtdValores, valor)){
+            atual->valor[atual->qtdValores] = valor;
+            sort(atual->valor, 0, atual->qtdValores);
+            atual->qtdValores++;
+        }
+        return;
+    }
+
+    atual->altura = 1 + max(altura(atual->esq), altura(atual->dir));
+    int balanceamento = fatorBalanciamento(atual);
+
+    if(balanceamento > 1) {
+        if (fatorBalanciamento(atual->dir) < 0) {
+            rotacaoEsquerda(&atual);
+            rotacaoEsquerda(&atual);
+            return;
+        }
+        else {
+            rotacaoEsquerda(&atual);
+            return;
+        }
+    }
+
+    if(balanceamento < -1) {
+        if (fatorBalanciamento(atual->esq) > 0) {
+            rotacaoDireita(&atual);
+            rotacaoDireita(&atual);
+            return;
+        }
+        else {
+            rotacaoDireita(&atual);
+            return;
+        }
+    }
+}
+
+void AVL::rotacaoEsquerda(Node **no) {
+    Node *x = *no;
     Node* y = x->dir;
     Node* T2 = y->esq;
 
     y->esq = x;
     x->dir = T2;
 
-    if (T2 != NULL) {
+    if (T2 != nullptr) {
         T2->pai = x;
     }
 
-    if (x != NULL) {
-        x->pai = y;
+    y->pai = x->pai;
+    if (x->pai == nullptr) {
+        raiz = y;
+    } else if (x == x->pai->esq) {
+        x->pai->esq = y;
+    } else {
+        x->pai->dir = y;
     }
 
+    x->pai = y;
+    
     x->altura = max(altura(x->esq), altura(x->dir)) + 1;
     y->altura = max(altura(y->esq), altura(y->dir)) + 1;
-
-    return y;
 }
 
-Node* AVL::rotacaoDireita(Node* y) {
+void AVL::rotacaoDireita(Node** no) {
+    Node *y = *no;
     Node* x = y->esq;
     Node* T2 = x->dir;
 
@@ -115,22 +189,29 @@ Node* AVL::rotacaoDireita(Node* y) {
         T2->pai = y;
     }
 
-    if (y != nullptr) {
-        y->pai = x;
+    x->pai = y->pai;
+    if (y->pai == nullptr) {
+        raiz = x;
+    } else if (y == y->pai->esq) {
+        y->pai->esq = x;
+    } else {
+        y->pai->dir = x;
     }
+
+    y->pai = x;
 
     y->altura = max(altura(y->esq), altura(y->dir)) + 1;
     x->altura = max(altura(x->esq), altura(x->dir)) + 1;
-
-    return x;
 }
 
-Node* AVL::novoNo(string chave) {
+Node* AVL::novoNo(string chave, int valor) {
     Node* no = new Node();
     no->chave = chave;
     no->pai = NULL;
     no->dir = NULL;
     no->esq = NULL;
+    no->valor[0] = valor;
+    no->qtdValores = 1;
     no->altura = 1;
 
     return no;
