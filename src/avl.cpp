@@ -98,21 +98,22 @@ int AVL::contem(int* valores, int tamanho, int valor) {
 }
 
 void AVL::insere(string chave, int valor) {
-    insereRecursivo(&raiz, chave, valor);
+    insereRecursivo(&raiz, chave, valor, NULL);
 }
 
-void AVL::insereRecursivo(Node **no, string chave, int valor) {
+void AVL::insereRecursivo(Node **no, string chave, int valor, Node* pai) {
     if (*no == NULL) {
         *no = novoNo(chave, valor);
+        (*no)->pai = pai;
         return;
     }
 
     Node *atual = *no;
 
     if (chave < atual->chave) {
-        insereRecursivo(&(atual->esq), chave, valor);
+        insereRecursivo(&(atual->esq), chave, valor, atual);
     } else if (chave > atual->chave) {
-        insereRecursivo(&(atual->dir), chave, valor);
+        insereRecursivo(&(atual->dir), chave, valor, atual);
     } else {
         if (!contem(atual->valor, atual->qtdValores, valor)){
             atual->valor[atual->qtdValores] = valor;

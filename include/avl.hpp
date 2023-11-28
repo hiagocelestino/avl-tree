@@ -22,7 +22,7 @@ class AVL {
         int max(int v1, int v2);
         int altura(Node *no);
         int* pesquisaRecursivo(Node *no, string chave);
-        void insereRecursivo(Node **no, string chave, int valor);
+        void insereRecursivo(Node **no, string chave, int valor, Node* pai);
         void rotacaoEsquerda(Node **x);
         void rotacaoDireita(Node **x);
         Node* novoNo(string chave, int valor);
