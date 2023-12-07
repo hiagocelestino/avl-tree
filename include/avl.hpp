@@ -7,7 +7,7 @@ using namespace std;
 
 typedef struct node {
     string chave;
-    int valor[100];
+    int valor[500];
     int altura;
     int qtdValores;
     struct node *esq;
@@ -32,6 +32,7 @@ class AVL {
         void swap(int* valores, int pos1, int pos2);
         int contem(int* valores, int tamanho, int valor);
         void limpaRecursivo(Node* no);
+        bool busca_binaria(int* valores, int valor, int inicio, int fim);
     public:
         void imprimiArvore();
         void insere(string chave, int valor);

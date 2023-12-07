@@ -14,7 +14,9 @@ void AVL::limpaRecursivo(Node* no) {
     } else {
         limpaRecursivo(no->esq);
         limpaRecursivo(no->dir);
-        delete no;
+        if (no->chave != "") {
+            delete no;
+        }
     }
 
 }
@@ -97,6 +99,22 @@ int AVL::contem(int* valores, int tamanho, int valor) {
     return contem;
 }
 
+bool AVL::busca_binaria(int* valores, int valor, int inicio, int fim) {
+    if (fim >= inicio ){
+        int meio = inicio + (fim - inicio) / 2;
+
+        if (valores[meio] == valor) {
+            return true;
+        }
+        if ( valores[meio] > valor ) {
+            return busca_binaria(valores, valor, inicio, meio - 1);
+        } else {
+            return busca_binaria(valores, valor, meio + 1, fim);
+        }
+    }
+    return false;
+}
+
 void AVL::insere(string chave, int valor) {
     insereRecursivo(&raiz, chave, valor, NULL);
 }
@@ -115,7 +133,7 @@ void AVL::insereRecursivo(Node **no, string chave, int valor, Node* pai) {
     } else if (chave > atual->chave) {
         insereRecursivo(&(atual->dir), chave, valor, atual);
     } else {
-        if (!contem(atual->valor, atual->qtdValores, valor)){
+        if (!busca_binaria(atual->valor, valor, 0, atual->qtdValores -1)){
             atual->valor[atual->qtdValores] = valor;
             sort(atual->valor, 0, atual->qtdValores);
             atual->qtdValores++;
